@@ -48,3 +48,5 @@ dist <- distCosine(c1, c2, r=6378.137) #earth raidus in KM, assumes earth is sph
 ####Exploratory Analysis####
 
 ####Modeling####
+
+#####Results and Graphics####
