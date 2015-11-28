@@ -194,14 +194,15 @@ write.csv(dt_routes,file="Route_Data.csv", na="")
 dt <- na.omit(copy(dt_routes))
 reg1 <- lm(data=dt, formula = mktpax ~log_twoPops + log_twoIncome + dist_mi +
                               orig_tourist + dest_tourist + orig_industry + 
-                              dest_industry + gdp)
+                              dest_industry + gdp + dcost)
 summary(reg1)
 
 reg2 <- lm(data=dt, formula = mktpax ~twoPops + twoIncome + dist_mi +
-             orig_tourist + dest_tourist + orig_industry + dest_industry + gdp)
+             orig_tourist + dest_tourist + orig_industry + dest_industry + gdp + dcost)
 summary(reg2)
 
 
+#SVM
 
 
 #####Results and Graphics####
