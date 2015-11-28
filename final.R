@@ -120,7 +120,7 @@ for (i in 1:nrow(dt_routes) ) {
   dt_routes[i, dest_income := income_dt[yX1==dest, year_name, with=F ]]
 }
 
-##add populatio
+##add population
 population_dt =  read.csv("./populationdata.csv")
 #add 3 letter airport identifier to population data
 #CHECK one airport missing
@@ -160,6 +160,12 @@ dt_routes[,orig_industry := "NA"]
 dt_routes[,dest_industry := "NA"]
 
 
+#add economic indicator for years
+econ_dt <- data.table(read.csv("Economy.csv",header = FALSE))
+names(econ_dt) <- c("year","gdp")
+dt_routes <- merge(x = dt_routes, y = econ_dt, by.x ="year", by.y="year" )
+
+
 #add categories
 for (i in 1:nrow(dt_routes) ) {
   orig = dt_routes$origin[i]
@@ -170,10 +176,32 @@ for (i in 1:nrow(dt_routes) ) {
   dt_routes[i, dest_industry := categ_dt[Locid==dest, Industrial, with=F ]]
 }
 
+#add multplication and log of income and population
+dt_routes[, log_twoPops := log(orig_pop *dest_pop)]
+dt_routes[, twoPops := (orig_pop +dest_pop)]
+dt_routes[, log_twoIncome := log(orig_income*dest_income)]
+dt_routes[, twoIncome := orig_income + dest_income ]
+
+
+
+
 #export to xlsx
 write.csv(dt_routes,file="Route_Data.csv", na="")
 ####Exploratory Analysis####
 
+
 ####Modeling####
+dt <- na.omit(copy(dt_routes))
+reg1 <- lm(data=dt, formula = mktpax ~log_twoPops + log_twoIncome + dist_mi +
+                              orig_tourist + dest_tourist + orig_industry + 
+                              dest_industry + gdp)
+summary(reg1)
+
+reg2 <- lm(data=dt, formula = mktpax ~twoPops + twoIncome + dist_mi +
+             orig_tourist + dest_tourist + orig_industry + dest_industry + gdp)
+summary(reg2)
+
+
+
 
 #####Results and Graphics####
