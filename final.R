@@ -121,7 +121,7 @@ for (i in 1:nrow(dt_routes) ) {
 }
 
 ##add population
-population_dt =  read.csv("./populationdata.csv")
+population_dt =  read.csv("./populationdata_updated.csv")
 #add 3 letter airport identifier to population data
 #CHECK one airport missing
 # for (i in 1:nrow(population_dt)) {
@@ -139,7 +139,7 @@ dt_routes[,dest_pop := 0 ]
 for (i in 1:nrow(dt_routes) ) {
   orig = dt_routes$origin[i]
   dest = dt_routes$dest[i]
-  year_name = paste0("X",dt_routes$year[i])
+  year_name = paste0("x",dt_routes$year[i])
   dt_routes[i,orig_pop := population_dt[Locid==orig, year_name, with=F ]]
   dt_routes[i,dest_pop := population_dt[Locid==dest, year_name, with=F ]]
 }
