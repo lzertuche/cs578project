@@ -5,15 +5,22 @@ set.seed(500)
 Data_source = 'Data/Final_Data_mean.csv'
 #read data
 Data = read.csv(Data_source)
+
+# Data[Data[,"mktpax"]>=median(Data[,"mktpax"]),"Label"] = 1
+# Data[Data[,"mktpax"]<median(Data[,"mktpax"]),"Label"] = 0
+temp = sort(Data[,"mktpax"])
 N = nrow(Data)
+
+t1 = temp[round(N/3)]
+t2 = temp[round(2*N/3)]
+
+Data[Data[,"mktpax"]<=t1,"Label"] = 0
+Data[Data[,"mktpax"]>t1 & Data[,"mktpax"]<=t2,"Label"] = 1
+Data[Data[,"mktpax"]>t2,"Label"] = 2
+
 ntrain = round(0.6*N)
 nvalid = round(0.2*N)
 ntest = round(0.2*N)
-
-#data dichotomies mean/median, You can use mean instead of median
-Data[Data[,"mktpax"]>=median(Data[,"mktpax"]),"Label"] = 1
-Data[Data[,"mktpax"]<median(Data[,"mktpax"]),"Label"] = 0
-
 
 train_val_sample = sample(1:N,ntrain+nvalid,replace = F)
 Data_train = Data[train_val_sample[1:ntrain],]
@@ -49,7 +56,7 @@ library(caret)
 #Tuning cost parameter with poly dot
 grid <-expand.grid(cost = seq(1,500,10),degree=1:4)
 Performance = matrix(nrow = nrow(grid),ncol = 9)
-colnames(Performance) <- c("trainAcc","valAcc","valPrecision","valRecall","valF1_score","testAcc","testPrecision","testRecall","testF1_score")
+colnames(Performance) <- c("trainAcc","valAcc","testAcc")
 for(i in 1:nrow(grid)){
   #svm = ksvm(model,data = Data_train, kernel = "rbfdot",type = "C-svc", C=grid$cost[i])
   svm = ksvm(model,data = Data_train, kernel = "polydot",type = "C-svc", C=grid$cost[i],kpar = list(degree = grid$degree[i]))
@@ -62,13 +69,13 @@ for(i in 1:nrow(grid)){
   Result = confusionMatrix(pr_svm,Data_val[,ncol(Data_val)])
   Performance[i,"trainAcc"] = 1-error(svm)
   Performance[i,"valAcc"] = Result$overall[1]
-  tp = Result$table[2,2]
-  tn = Result$table[1,1]
-  fp = Result$table[2,1]
-  fn = Result$table[1,2]
-  Performance[i,"valPrecision"] = tp/(tp+fp)
-  Performance[i,"valRecall"] = tp/(tp+fn)
-  Performance[i,"valF1_score"] = 2*Performance[i,"valPrecision"]*Performance[i,"valRecall"]/(Performance[i,"valPrecision"]+Performance[i,"valRecall"])
+#   tp = Result$table[2,2]
+#   tn = Result$table[1,1]
+#   fp = Result$table[2,1]
+#   fn = Result$table[1,2]
+#   Performance[i,"valPrecision"] = tp/(tp+fp)
+#   Performance[i,"valRecall"] = tp/(tp+fn)
+#   Performance[i,"valF1_score"] = 2*Performance[i,"valPrecision"]*Performance[i,"valRecall"]/(Performance[i,"valPrecision"]+Performance[i,"valRecall"])
   
   #test
   pr_svm_test = predict(svm,Data_test[,-ncol(Data_test)])
@@ -76,18 +83,18 @@ for(i in 1:nrow(grid)){
   
   #test performance
   Performance[i,"testAcc"] = Result$overall[1]
-  tp = Result$table[2,2]
-  tn = Result$table[1,1]
-  fp = Result$table[2,1]
-  fn = Result$table[1,2]
-  Performance[i,"testPrecision"] = tp/(tp+fp)
-  Performance[i,"testRecall"] = tp/(tp+fn)
-  Performance[i,"testF1_score"] = 2*Performance[i,"testPrecision"]*Performance[i,"testRecall"]/(Performance[i,"testPrecision"]+Performance[i,"testRecall"])
+#   tp = Result$table[2,2]
+#   tn = Result$table[1,1]
+#   fp = Result$table[2,1]
+#   fn = Result$table[1,2]
+#   Performance[i,"testPrecision"] = tp/(tp+fp)
+#   Performance[i,"testRecall"] = tp/(tp+fn)
+#   Performance[i,"testF1_score"] = 2*Performance[i,"testPrecision"]*Performance[i,"testRecall"]/(Performance[i,"testPrecision"]+Performance[i,"testRecall"])
   
   
   
 }
-write.csv(cbind(grid,Performance),'Analysis/perf_svm_poly_C_degree_median.csv')
+write.csv(cbind(grid,Performance),'Analysis/perf_svm_poly_C_degree_3class.csv')
 
 
 
@@ -109,13 +116,13 @@ for(i in 1:nrow(grid)){
   Result = confusionMatrix(pr_svm,Data_val[,ncol(Data_val)])
   Performance[i,"trainAcc"] = 1-error(svm)
   Performance[i,"valAcc"] = Result$overall[1]
-  tp = Result$table[2,2]
-  tn = Result$table[1,1]
-  fp = Result$table[2,1]
-  fn = Result$table[1,2]
-  Performance[i,"valPrecision"] = tp/(tp+fp)
-  Performance[i,"valRecall"] = tp/(tp+fn)
-  Performance[i,"valF1_score"] = 2*Performance[i,"valPrecision"]*Performance[i,"valRecall"]/(Performance[i,"valPrecision"]+Performance[i,"valRecall"])
+#   tp = Result$table[2,2]
+#   tn = Result$table[1,1]
+#   fp = Result$table[2,1]
+#   fn = Result$table[1,2]
+#   Performance[i,"valPrecision"] = tp/(tp+fp)
+#   Performance[i,"valRecall"] = tp/(tp+fn)
+#   Performance[i,"valF1_score"] = 2*Performance[i,"valPrecision"]*Performance[i,"valRecall"]/(Performance[i,"valPrecision"]+Performance[i,"valRecall"])
 
   
   #test
@@ -124,17 +131,17 @@ for(i in 1:nrow(grid)){
   
   #test performance
   Performance[i,"testAcc"] = Result$overall[1]
-  tp = Result$table[2,2]
-  tn = Result$table[1,1]
-  fp = Result$table[2,1]
-  fn = Result$table[1,2]
-  Performance[i,"testPrecision"] = tp/(tp+fp)
-  Performance[i,"testRecall"] = tp/(tp+fn)
-  Performance[i,"testF1_score"] = 2*Performance[i,"testPrecision"]*Performance[i,"testRecall"]/(Performance[i,"testPrecision"]+Performance[i,"testRecall"])
-  
+#   tp = Result$table[2,2]
+#   tn = Result$table[1,1]
+#   fp = Result$table[2,1]
+#   fn = Result$table[1,2]
+#   Performance[i,"testPrecision"] = tp/(tp+fp)
+#   Performance[i,"testRecall"] = tp/(tp+fn)
+#   Performance[i,"testF1_score"] = 2*Performance[i,"testPrecision"]*Performance[i,"testRecall"]/(Performance[i,"testPrecision"]+Performance[i,"testRecall"])
+#   
 
 }
-write.csv(cbind(grid,Performance),'Analysis/perf_svm_rbf_C_median.csv')
+write.csv(cbind(grid,Performance),'Analysis/perf_svm_rbf_C_3class.csv')
 
 
 #Tuning cost parameter with laplace dot
@@ -152,13 +159,13 @@ for(i in 1:nrow(grid)){
   Result = confusionMatrix(pr_svm,Data_val[,ncol(Data_val)])
   Performance[i,"trainAcc"] = 1-error(svm)
   Performance[i,"valAcc"] = Result$overall[1]
-  tp = Result$table[2,2]
-  tn = Result$table[1,1]
-  fp = Result$table[2,1]
-  fn = Result$table[1,2]
-  Performance[i,"valPrecision"] = tp/(tp+fp)
-  Performance[i,"valRecall"] = tp/(tp+fn)
-  Performance[i,"valF1_score"] = 2*Performance[i,"valPrecision"]*Performance[i,"valRecall"]/(Performance[i,"valPrecision"]+Performance[i,"valRecall"])
+#   tp = Result$table[2,2]
+#   tn = Result$table[1,1]
+#   fp = Result$table[2,1]
+#   fn = Result$table[1,2]
+#   Performance[i,"valPrecision"] = tp/(tp+fp)
+#   Performance[i,"valRecall"] = tp/(tp+fn)
+#   Performance[i,"valF1_score"] = 2*Performance[i,"valPrecision"]*Performance[i,"valRecall"]/(Performance[i,"valPrecision"]+Performance[i,"valRecall"])
 
   #test
   pr_svm_test = predict(svm,Data_test[,-ncol(Data_test)])
@@ -166,17 +173,17 @@ for(i in 1:nrow(grid)){
   
   #test performance
   Performance[i,"testAcc"] = Result$overall[1]
-  tp = Result$table[2,2]
-  tn = Result$table[1,1]
-  fp = Result$table[2,1]
-  fn = Result$table[1,2]
-  Performance[i,"testPrecision"] = tp/(tp+fp)
-  Performance[i,"testRecall"] = tp/(tp+fn)
-  Performance[i,"testF1_score"] = 2*Performance[i,"testPrecision"]*Performance[i,"testRecall"]/(Performance[i,"testPrecision"]+Performance[i,"testRecall"])
-  
+#   tp = Result$table[2,2]
+#   tn = Result$table[1,1]
+#   fp = Result$table[2,1]
+#   fn = Result$table[1,2]
+#   Performance[i,"testPrecision"] = tp/(tp+fp)
+#   Performance[i,"testRecall"] = tp/(tp+fn)
+#   Performance[i,"testF1_score"] = 2*Performance[i,"testPrecision"]*Performance[i,"testRecall"]/(Performance[i,"testPrecision"]+Performance[i,"testRecall"])
+#   
   
 }
-write.csv(cbind(grid,Performance),'Analysis/perf_svm_laplace_C_median.csv')
+write.csv(cbind(grid,Performance),'Analysis/perf_svm_laplace_C_3class.csv')
 
 
 ##Generative model: Naive Bayes
@@ -200,15 +207,15 @@ Result = confusionMatrix(pr_nb,Data_test[,ncol(Data_test)])
 
 
 Performance[1,"testAcc"] = Result$overall[1]
-tp = Result$table[2,2]
-tn = Result$table[1,1]
-fp = Result$table[2,1]
-fn = Result$table[1,2]
-Performance[1,"testPrecision"]  = tp/(tp+fp)
-Performance[1,"testRecall"]  = tp/(tp+fn)
-Performance[1,"testF1_score"]  = 2*Performance[1,"testPrecision"]*Performance[1,"testRecall"]/(Performance[1,"testPrecision"]+Performance[1,"testRecall"])
+# tp = Result$table[2,2]
+# tn = Result$table[1,1]
+# fp = Result$table[2,1]
+# fn = Result$table[1,2]
+# Performance[1,"testPrecision"]  = tp/(tp+fp)
+# Performance[1,"testRecall"]  = tp/(tp+fn)
+# Performance[1,"testF1_score"]  = 2*Performance[1,"testPrecision"]*Performance[1,"testRecall"]/(Performance[1,"testPrecision"]+Performance[1,"testRecall"])
 
 
 
-write.csv(Performance,'Analysis/perf_naive_bayes_median.csv')
+write.csv(Performance,'Analysis/perf_naive_bayes_3class.csv')
 
