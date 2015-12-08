@@ -18,7 +18,7 @@
 #t[2] is the svm model: useful when not tuning used. it is the training model outcome
 #t[3] is the detailed result: also useful when tuning is not used. 
 #
-mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2,perTest=0.2,myCost=600,myDegree=2,costRange=c(1,1000,50),degreeRange=c(1,4,1),isWeight=FALSE,isTrans=FALSE,isWrite=TRUE,writeFolder='Analysis/')
+mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2,perTest=0.2,myCost=600,myDegree=2,costRange=c(1,1000,50),degreeRange=c(1,4,1),isWeight=FALSE,isTrans=FALSE,isWrite=TRUE,writeFolder='Analysis/',year_test=NULL)
 {
   print(nClass)
   require("caret")
@@ -57,7 +57,12 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
   #Data_test = as.data.frame(Data[-train_val_sample,c(-1:-3,-5:-11)])
   Data_test = Data[-train_val_sample,]
   
-  if(isTrans==TRUE)
+  if(is.null(year_test)==FALSE)
+  {
+    a = Data_test[,"year"]==year_test
+    Data_test = Data_test[a,]
+  }
+  else if(isTrans==TRUE)
   {
     transition_data_test = matrix(nrow=1,ncol= ncol(Data_test))
     flag = 0
