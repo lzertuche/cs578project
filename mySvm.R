@@ -18,7 +18,7 @@
 #t[2] is the svm model: useful when not tuning used. it is the training model outcome
 #t[3] is the detailed result: also useful when tuning is not used. 
 #
-mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2,perTest=0.2,myCost=600,myDegree=2,costRange=c(1,1000,50),degreeRange=c(1,4,1),isWeight=FALSE,isTrans=FALSE,isWrite=TRUE,writeFolder='Analysis/',year_test=NULL)
+mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2,perTest=0.2,myCost=600,myDegree=2,costRange=c(1,1000,50),degreeRange=c(1,4,1),isWeight=FALSE,isTrans=FALSE,isWrite=TRUE,writeFolder='Analysis/',year_test=NULL,probab=FALSE)
 {
   print(nClass)
   library("dplyr")
