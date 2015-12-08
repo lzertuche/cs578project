@@ -21,12 +21,12 @@
 mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2,perTest=0.2,myCost=600,myDegree=2,costRange=c(1,1000,50),degreeRange=c(1,4,1),isWeight=FALSE,isTrans=FALSE,isWrite=TRUE,writeFolder='Analysis/',year_test=NULL)
 {
   print(nClass)
-  require("caret")
   library("dplyr")
   library(neuralnet)
   library(kernlab)
   library(e1071)
   library(caret)
+  library(dataframes2xls)
   #data source
   set.seed(500)
   #Data_source = 'Data/Final_Data_mean.csv'
@@ -186,7 +186,7 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
     else
     {
       #Tuning cost parameter with rbf and laplace dotdot
-      grid <-expand.grid(seq(costRange[1],costRange[2],costRange[3]))
+      grid <-expand.grid(cost = seq(costRange[1],costRange[2],costRange[3]))
       Performance = matrix(nrow = nrow(grid),ncol = 3)
       colnames(Performance) <- c("trainAcc","valAcc","testAcc")
       for(i in 1:nrow(grid)){
@@ -234,17 +234,21 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
   {
     if(isTrans==TRUE)
     { 
-      if(isWeight==TRUE) filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'_','trans_weight','.csv',sep="")
-      else filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'_','trans','.csv',sep="")
+      if(isWeight==TRUE) filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'_','trans_weight',year_test,'.csv',sep="")
+      else filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'_','trans','.csv',year_test,sep="")
     }
     else
     {
-      if(isWeight==TRUE) filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'_','weight','.csv',sep="")
-      else filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'.csv',sep="")
+      if(isWeight==TRUE) filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'_','weight',year_test,'.csv',sep="")
+      else filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,year_test,'.csv',sep="")
     }
     print(filename)
-    if(isTuning==TRUE) write.csv(cbind(grid,Performance),filename)
-    else write.csv(Performance,filename)
+    if(isTuning==TRUE) write.xls(cbind(grid,Performance),filename)
+    else 
+    {
+      write.xls(Performance,filename,sh.names = "performance")
+      write.xls(Result$table,filename,sh.names = "table")
+    }
   }
   return(list(Performance,svm,Result))  
   
