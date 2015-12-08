@@ -140,7 +140,9 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
   else
   {
     if(ker=="polydot"){
-      grid <-expand.grid(cost = seq(costRange),degree=seq(degreeRange))
+      
+      grid <-expand.grid(cost = seq(costRange[1],costRange[2],costRange[3]),degree=seq(degreeRange[1],degreeRange[2],degreeRange[3]))
+      #print(grid)
       Performance = matrix(nrow = nrow(grid),ncol = 3)
       colnames(Performance) <- c("trainAcc","valAcc","testAcc")
       for(i in 1:nrow(grid)){
@@ -184,9 +186,9 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
     else
     {
       #Tuning cost parameter with rbf and laplace dotdot
-      grid <-expand.grid(cost = seq(1,5000,50))
-      Performance = matrix(nrow = nrow(grid),ncol = 9)
-      colnames(Performance) <- c("trainAcc","valAcc","valPrecision","valRecall","valF1_score","testAcc","testPrecision","testRecall","testF1_score")
+      grid <-expand.grid(seq(costRange[1],costRange[2],costRange[3]))
+      Performance = matrix(nrow = nrow(grid),ncol = 3)
+      colnames(Performance) <- c("trainAcc","valAcc","testAcc")
       for(i in 1:nrow(grid)){
         svm = ksvm(model,data = Data_train, kernel = ker,type = "C-svc", C=grid$cost[i])
         
