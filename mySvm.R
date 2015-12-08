@@ -26,7 +26,9 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
   library(kernlab)
   library(e1071)
   library(caret)
-  library(dataframes2xls)
+  #library(dataframes2xls)
+  #require(xlsx)
+  
   #data source
   set.seed(500)
   #Data_source = 'Data/Final_Data_mean.csv'
@@ -108,7 +110,7 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
   
   #model
   model = Label ~ distcalc+orig_income	+ dest_income	+ orig_pop	+ dest_pop	+ Hub	+ ecoPerCapita	+ Tourist	+Industry
-
+  grid <- NULL
   if(isTuning==FALSE)
   {
     
@@ -230,24 +232,44 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
     }
     
   }
+  print(grid)
   if(isWrite==TRUE)
   {
+    filename = paste(writeFolder,'svm_perf_',nClass,sep="")
+    if(is.null(year_test)==FALSE) filename = paste(filename,'_',year_test,sep="")
     if(isTrans==TRUE)
     { 
-      if(isWeight==TRUE) filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'_','trans_weight',year_test,'.csv',sep="")
-      else filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'_','trans','.csv',year_test,sep="")
+      filename= paste(filename,'_','trans',sep="")
     }
-    else
-    {
-      if(isWeight==TRUE) filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'_','weight',year_test,'.csv',sep="")
-      else filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,year_test,'.csv',sep="")
-    }
+    if(isWeight==TRUE) filename= paste(filename,'_','weight',sep="")
+    
+    if(isTuning==TRUE) filename= paste(filename,'_','tune',sep="")
+    
+    
+#     if(isTrans==TRUE)
+#     { 
+#       if(isWeight==TRUE) filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'_','trans_weight',year_test,'.csv',sep="")
+#       else filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'_','trans','.csv',year_test,sep="")
+#     }
+#     else
+#     {
+#       if(isWeight==TRUE) filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,'_','weight',year_test,'.csv',sep="")
+#       else filename= paste(writeFolder,'svm_perf_',ker,'_',nClass,year_test,'.csv',sep="")
+#     }
+#     if (isTuning==TRUE)
+#     {
+#       file
+#     }
     print(filename)
-    if(isTuning==TRUE) write.xls(cbind(grid,Performance),filename)
+    if(isTuning==TRUE) 
+    {
+      df = cbind(grid,Performance)
+      write.csv(df,paste(filename,".csv",sep=""))
+    }
     else 
     {
-      write.xls(Performance,filename,sh.names = "performance")
-      write.xls(Result$table,filename,sh.names = "table")
+      write.csv(Performance,paste(filename,".csv",sep=""))
+      write.csv(Result$table,paste(filename,'_table',".csv",sep=""))
     }
   }
   return(list(Performance,svm,Result))  
