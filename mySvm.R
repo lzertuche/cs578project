@@ -18,7 +18,16 @@
 #t[2] is the svm model: useful when not tuning used. it is the training model outcome
 #t[3] is the detailed result: also useful when tuning is not used. 
 #
-mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2,perTest=0.2,myCost=600,myDegree=2,costRange=c(1,1000,50),degreeRange=c(1,4,1),isWeight=FALSE,isTrans=FALSE,isWrite=TRUE,writeFolder='Analysis/',year_test=NULL)
+
+weightedAccuracy<-function(pr,ac,nClass)
+{
+  print(length(pr))
+  print(length(ac))
+  pr_weight = 1-2*abs(pr-ac)/nClass
+  acc = sum(pr_weight)/length(pr_weight)
+}
+
+mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2,perTest=0.2,myCost=600,myDegree=2,costRange=c(1,1000,50),degreeRange=c(1,4,1),isWeight=FALSE,isTrans=FALSE,isWrite=TRUE,writeFolder='Analysis/',year_test=NULL,isWeightAcc=FALSE)
 {
   print(nClass)
   library("dplyr")
@@ -128,15 +137,24 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
     print(svm)
     #print(acc)
     
+    
+    
     Result = confusionMatrix(pr_svm,Data_val[,ncol(Data_val)])
+    
+    if(isWeightAcc==TRUE) acc <- weightedAccuracy(pr_svm,Data_val[,ncol(Data_val)],nClass)
+    else acc <- Result$overall[1]
+    
     Performance[1,"trainAcc"] = 1-error(svm)
-    Performance[1,"valAcc"] = Result$overall[1]
+    Performance[1,"valAcc"] = acc
     
     pr_svm_test = predict(svm,Data_test[,-ncol(Data_test)])
     Result = confusionMatrix(pr_svm_test,Data_test[,ncol(Data_test)])
     
+    if(isWeightAcc==TRUE) acc <- weightedAccuracy(pr_svm_test,Data_test[,ncol(Data_test)],nClass)
+    else acc <- Result$overall[1]
+    
     #test performance
-    Performance[1,"testAcc"] = Result$overall[1]
+    Performance[1,"testAcc"] = acc
   
   }
   else
@@ -157,8 +175,12 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
         #print(acc)
         
         Result = confusionMatrix(pr_svm,Data_val[,ncol(Data_val)])
+        
+        if(isWeightAcc==TRUE) acc <- weightedAccuracy(pr_svm,Data_val[,ncol(Data_val)],nClass)
+        else acc <- Result$overall[1]
+        
         Performance[i,"trainAcc"] = 1-error(svm)
-        Performance[i,"valAcc"] = Result$overall[1]
+        Performance[i,"valAcc"] = acc
         #   tp = Result$table[2,2]
         #   tn = Result$table[1,1]
         #   fp = Result$table[2,1]
@@ -171,8 +193,11 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
         pr_svm_test = predict(svm,Data_test[,-ncol(Data_test)])
         Result = confusionMatrix(pr_svm_test,Data_test[,ncol(Data_test)])
         
+        if(isWeightAcc==TRUE) acc <- weightedAccuracy(pr_svm_test,Data_test[,ncol(Data_test)],nClass)
+        else acc <- Result$overall[1]
+        
         #test performance
-        Performance[i,"testAcc"] = Result$overall[1]
+        Performance[i,"testAcc"] = acc
         #   tp = Result$table[2,2]
         #   tn = Result$table[1,1]
         #   fp = Result$table[2,1]
@@ -200,8 +225,12 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
         print(svm)
         #print(acc)
         Result = confusionMatrix(pr_svm,Data_val[,ncol(Data_val)])
+        
+        if(isWeightAcc==TRUE) acc <- weightedAccuracy(pr_svm,Data_val[,ncol(Data_val)],nClass)
+        else acc <- Result$overall[1]
+        
         Performance[i,"trainAcc"] = 1-error(svm)
-        Performance[i,"valAcc"] = Result$overall[1]
+        Performance[i,"valAcc"] = acc
         #   tp = Result$table[2,2]
         #   tn = Result$table[1,1]
         #   fp = Result$table[2,1]
@@ -215,8 +244,11 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
         pr_svm_test = predict(svm,Data_test[,-ncol(Data_test)])
         Result = confusionMatrix(pr_svm_test,Data_test[,ncol(Data_test)])
         
+        if(isWeightAcc==TRUE) acc <- weightedAccuracy(pr_svm_test,Data_test[,ncol(Data_test)],nClass)
+        else acc <- Result$overall[1]
+        
         #test performance
-        Performance[i,"testAcc"] = Result$overall[1]
+        Performance[i,"testAcc"] = acc
         #   tp = Result$table[2,2]
         #   tn = Result$table[1,1]
         #   fp = Result$table[2,1]
