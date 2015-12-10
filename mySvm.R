@@ -27,7 +27,7 @@ weightedAccuracy<-function(pr,ac,nClass)
   acc = sum(pr_weight)/length(pr_weight)
 }
 
-mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2,perTest=0.2,myCost=600,myDegree=2,costRange=c(1,1000,50),degreeRange=c(1,4,1),isWeight=FALSE,isTrans=FALSE,isWrite=TRUE,writeFolder='Analysis/',year_test=NULL,isWeightAcc=FALSE)
+mySvm<-function(Data,model=NULL,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2,perTest=0.2,myCost=600,myDegree=2,costRange=c(1,1000,50),degreeRange=c(1,4,1),isWeight=FALSE,isTrans=FALSE,isWrite=TRUE,writeFolder='Analysis/',year_test=NULL,isWeightAcc=FALSE)
 {
   print(nClass)
   library("dplyr")
@@ -118,7 +118,7 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
   
   
   #model
-  model = Label ~ distcalc+orig_income	+ dest_income	+ orig_pop	+ dest_pop	+ Hub	+ ecoPerCapita	+ Tourist	+Industry
+  if(is.null(model)==TRUE) model = Label ~ distcalc+orig_income	+ dest_income	+ orig_pop	+ dest_pop	+ Hub	+ ecoPerCapita	+ Tourist	+Industry 
   grid <- NULL
   if(isTuning==FALSE)
   {
@@ -141,14 +141,18 @@ mySvm<-function(Data,nClass=2,ker="rbfdot",isTuning=TRUE,perTrain=0.6,perVal=0.2
     
     Result = confusionMatrix(pr_svm,Data_val[,ncol(Data_val)])
     
+    
     if(isWeightAcc==TRUE) acc <- weightedAccuracy(pr_svm,Data_val[,ncol(Data_val)],nClass)
     else acc <- Result$overall[1]
+    
     
     Performance[1,"trainAcc"] = 1-error(svm)
     Performance[1,"valAcc"] = acc
     
     pr_svm_test = predict(svm,Data_test[,-ncol(Data_test)])
+    print(1)
     Result = confusionMatrix(pr_svm_test,Data_test[,ncol(Data_test)])
+    
     
     if(isWeightAcc==TRUE) acc <- weightedAccuracy(pr_svm_test,Data_test[,ncol(Data_test)],nClass)
     else acc <- Result$overall[1]
