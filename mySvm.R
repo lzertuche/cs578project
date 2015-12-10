@@ -23,7 +23,7 @@ weightedAccuracy<-function(pr,ac,nClass)
 {
   print(length(pr))
   print(length(ac))
-  pr_weight = 1-2*abs(pr-ac)/nClass
+  pr_weight = 1-abs(pr-ac)/nClass
   acc = sum(pr_weight)/length(pr_weight)
 }
 
